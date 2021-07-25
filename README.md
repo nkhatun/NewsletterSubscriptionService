@@ -1,0 +1,2 @@
+# NewsletterSubscriptionService
+this application uses microservice architecture
