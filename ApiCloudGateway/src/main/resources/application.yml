@@ -1,0 +1,53 @@
+server:
+  port: 8083
+  
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:  
+      routes: 
+        - id: USER-SERVICE 
+          uri:  lb://USER-SERVICE
+          predicates: 
+            - Path=/demo-user/**
+          filters: 
+            - name: CircuitBreaker
+              args: 
+                name: USER-SERVICE
+                fallbackuri: forward:/userServiceFallBack
+        - id: SUBSCRIPTION-SERVICE
+          uri:  lb://SUBSCRIPTION-SERVICE
+          predicates:
+            - Path=/demo-subscriptions/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SUBSCRIPTION-SERVICE
+                fallbackuri: forward:/subscriptionServiceFallback
+        - id: SUBSCRIPTION-DETAILS-SERVICE
+          uri:  lb://SUBSCRIPTION-DETAILS-SERVICE
+          predicates:
+            - Path=/demo-details/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SUBSCRIPTION-DETAILS-SERVICE
+                fallbackuri: forward:/detailsServiceFallback
+
+
+#Hystrix configuration
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+#Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
